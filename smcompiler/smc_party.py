@@ -11,7 +11,7 @@ from typing import (
 from communication import Communication
 from expression import (
     Expression,
-    Secret, AbstractOperator, Addition, Subtraction
+    Secret, AbstractOperator, Addition, Subtraction, Scalar, Multiplication
 )
 from protocol import ProtocolSpec
 from secret_sharing import Share, share_secret, reconstruct_secret
@@ -62,21 +62,26 @@ class SMCParty:
         """
         # 1. 创建自己的Secret，并且将自己的Secret发送给其他参与方
         self.create_and_send_share()
+
         # 2. 阻塞等待所有参与方完成第一步操作
         for id in self.protocol_spec.participant_ids:
             if id != self.client_id:
                 self.comm.retrieve_public_message(id, self.SHARE_PUBLISH_PREFIX + id)
+
         # 3. 所有参与方完成share共享后，开始解析expr，完成自己的计算任务
         curr_share = self.process_expression(self.protocol_spec.expr)
+
         # 4. 计算任务完成后向其他参与方发布自己的计算结果
         for id in self.protocol_spec.participant_ids:
             if id != self.client_id:
                 self.comm.publish_message(self.SHARE_COMPLETED_PREFIX + self.client_id, pickle.dumps(curr_share))
         completed_share = [curr_share]
+
         # 5. 获取其他参与方的计算结果
         for id in self.protocol_spec.participant_ids:
             if id != self.client_id:
                 completed_share.append(pickle.loads(self.comm.retrieve_public_message(id, self.SHARE_COMPLETED_PREFIX + id)))
+
         return reconstruct_secret(completed_share)
 
     # Suggestion: To process expressions, make use of the *visitor pattern* like so:
@@ -86,6 +91,10 @@ class SMCParty:
         # 自己的直接获取share，不是自己的发请求获取
         if isinstance(expr, Secret):
             return self.get_or_retrieve_share(expr)
+
+        # 遇到标量Scalar直接返回share
+        if isinstance(expr, Scalar):
+            return Share(expr.value)
 
         # 分离操作符
         if isinstance(expr, AbstractOperator):
@@ -99,6 +108,10 @@ class SMCParty:
             # 处理减法操作
             if isinstance(expr, Subtraction):
                 return pre_expr_share - next_expr_share
+
+            # 处理乘法操作
+            if isinstance(expr, Multiplication):
+                return pre_expr_share * next_expr_share
         # Call specialized methods for each expression type, and have these specialized
         # methods in turn call `process_expression` on their sub-expressions to process
         # further.
@@ -106,8 +119,13 @@ class SMCParty:
 
     # Feel free to add as many methods as you want.
     def get_or_retrieve_share(self, secret: Secret):
+        """
+        将原本由Secret表示的expr转换为Share表示的expr
+            * 如果Secret属于参与方自己，直接从share_dict中获取
+            * 如果Secret属于其他参与方，发请求获取
+        """
 
-        # 本地有直接获取
+        # 本地直接获取
         if secret in self.share_dict:
             return self.share_dict[secret]
 

@@ -32,7 +32,9 @@ class Share:
         return Share((self.val - other.val) % self.FIELD_Q)
 
     def __mul__(self, other):
-        raise NotImplementedError("You need to implement this method.")
+        if not isinstance(other, Share):
+            raise TypeError("Only sub for Share")
+        return Share((self.val * other.val) % self.FIELD_Q)
 
     def serialize(self):
         """Generate a representation suitable for passing in a message."""
