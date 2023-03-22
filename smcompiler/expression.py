@@ -118,6 +118,7 @@ class AbstractOperator(Expression):
 
     def scalar_format(self):
         """
+        将表达式expr操作符前后标量情况转换为具体数字
         a + b -> a == Scalar: 1  a != Scalar: 0
         (0, 0) = (!Scalar, !Scalar)
         (0, 1) = (!Scalar, Scalar)

@@ -104,9 +104,9 @@ class SMCParty:
             scalar_format = expr.scalar_format()
             # 检查前后表达式标量情况
             # 1. 对与加减法操作，存在标量时，只需第一个参与方执行加减法标量即可 see: pdf-1.5
-            # 2. 乘法操作存在标量时，直接返回相乘结果。无标量情况下，使用Beaver协议计算
+            # 2. 乘法操作存在标量时(secret * scalar or scalar * scalar)，直接返回相乘结果。无标量情况下(secret * secret)，使用Beaver协议计算 see: pdf-1.6
             if isinstance(expr, Addition) or isinstance(expr, Subtraction):
-
+                # 两边都不是标量 或 当前参与方是队长，处理加减法的标量操作
                 if scalar_format == 0 or self.is_captain():
                     # 处理加法操作
                     if isinstance(expr, Addition):
@@ -125,7 +125,14 @@ class SMCParty:
                     return Share(0)
             # 处理乘法操作
             if isinstance(expr, Multiplication):
-                return pre_expr_share * next_expr_share
+                # 乘法存在标量直接处理
+                if scalar_format > 0:
+                    return pre_expr_share * next_expr_share
+                # Multiplication using the Beaver triplet protocol -- pdf-1.6
+                # secret * secret
+
+
+
         # Call specialized methods for each expression type, and have these specialized
         # methods in turn call `process_expression` on their sub-expressions to process
         # further.
