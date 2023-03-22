@@ -101,14 +101,28 @@ class SMCParty:
             pre_expr, next_expr = expr.separate()
             pre_expr_share = self.process_expression(pre_expr)
             next_expr_share = self.process_expression(next_expr)
-            # 处理加法操作
-            if isinstance(expr, Addition):
-                return pre_expr_share + next_expr_share
+            scalar_format = expr.scalar_format()
+            # 检查前后表达式标量情况
+            # 1. 对与加减法操作，存在标量时，只需第一个参与方执行加减法标量即可 see: pdf-1.5
+            # 2. 乘法操作存在标量时，直接返回相乘结果。无标量情况下，使用Beaver协议计算
+            if isinstance(expr, Addition) or isinstance(expr, Subtraction):
 
-            # 处理减法操作
-            if isinstance(expr, Subtraction):
-                return pre_expr_share - next_expr_share
-
+                if scalar_format == 0 or self.is_captain():
+                    # 处理加法操作
+                    if isinstance(expr, Addition):
+                        return pre_expr_share + next_expr_share
+                    # 处理减法操作
+                    if isinstance(expr, Subtraction):
+                        return pre_expr_share - next_expr_share
+                # 如果expr操作符前是标量, 只需处理并返回操作符后的表达式
+                if scalar_format == 1:
+                    return next_expr_share
+                # 如果expr操作符后是标量, 只需处理并返回操作符前的表达式
+                if scalar_format == 2:
+                    return pre_expr_share
+                # 如果操作符前后都是标量，无需处理计算结果，因为参与方队长已经处理掉了
+                if scalar_format == 3:
+                    return Share(0)
             # 处理乘法操作
             if isinstance(expr, Multiplication):
                 return pre_expr_share * next_expr_share
@@ -154,3 +168,7 @@ class SMCParty:
 
         # 通知所有参与方自己完成加密并发送了share
         self.comm.publish_message(self.SHARE_PUBLISH_PREFIX + self.client_id, "~")
+
+    def is_captain(self):
+        # 指定参与方中第一个参与方为队长，负责加减运算中的标量处理
+        return self.protocol_spec.participant_ids[0] == self.client_id

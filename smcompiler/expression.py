@@ -116,6 +116,22 @@ class AbstractOperator(Expression):
         """
         return self.pre_expr, self.next_expr
 
+    def scalar_format(self):
+        """
+        a + b -> a == Scalar: 1  a != Scalar: 0
+        (0, 0) = (!Scalar, !Scalar)
+        (0, 1) = (!Scalar, Scalar)
+        (1, 0) = (Scalar, !Scalar)
+        (1, 1) = (Scalar. Scalar)
+
+        boolean(a) + boolean(b) >> 1
+        (0, 0) = 0
+        (0, 1) = 2
+        (1, 0) = 1
+        (1, 1) = 3
+        """
+        return int(isinstance(self.pre_expr, Scalar)) + int(isinstance(self.next_expr, Scalar) << 1)
+
 
 class Addition(AbstractOperator):
     """

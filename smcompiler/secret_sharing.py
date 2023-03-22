@@ -15,7 +15,7 @@ class Share:
 
     def __init__(self, val, *args, **kwargs):
         # Adapt constructor arguments as you wish
-        self.val = val
+        self.val = val % self.FIELD_Q
 
     def __repr__(self):
         # Helps with debugging.
