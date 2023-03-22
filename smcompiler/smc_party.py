@@ -11,7 +11,7 @@ from typing import (
 from communication import Communication
 from expression import (
     Expression,
-    Secret, AbstractOperator, Addition
+    Secret, AbstractOperator, Addition, Subtraction
 )
 from protocol import ProtocolSpec
 from secret_sharing import Share, share_secret, reconstruct_secret
@@ -95,6 +95,10 @@ class SMCParty:
             # 处理加法操作
             if isinstance(expr, Addition):
                 return pre_expr_share + next_expr_share
+
+            # 处理减法操作
+            if isinstance(expr, Subtraction):
+                return pre_expr_share - next_expr_share
         # Call specialized methods for each expression type, and have these specialized
         # methods in turn call `process_expression` on their sub-expressions to process
         # further.

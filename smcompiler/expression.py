@@ -23,6 +23,9 @@ def gen_id() -> bytes:
     return base64.b64encode(id_bytes)
 
 
+
+
+
 class Expression:
     """
     Base class for an arithmetic expression.
@@ -41,7 +44,7 @@ class Expression:
         return Addition(self, other)
 
     def __sub__(self, other):
-        raise NotImplementedError("You need to implement this method.")
+        return Subtraction(self, other)
 
     def __mul__(self, other):
         return Multiplication(self, other)
@@ -120,6 +123,12 @@ class Addition(AbstractOperator):
     """
     # def __repr__(self) -> str:
     #     return f"({repr(self.pre_expr)} + {self.next_expr})"
+
+
+class Subtraction(AbstractOperator):
+    """
+    减法操作
+    """
 
 
 class Multiplication(AbstractOperator):
