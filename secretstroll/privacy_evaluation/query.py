@@ -1,5 +1,6 @@
-import numpy as np
 from os import path
+
+import numpy as np
 
 # Globals
 DIST_THRESH = 0.01

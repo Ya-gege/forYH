@@ -40,13 +40,12 @@ this file. As such, if you need to serialize an object containing some
 import base64
 
 import jsonpickle
-
-from petrelic.bn import Bn
 from petrelic.additive.pairing import (
     G1Element as G1EA,
     G2Element as G2EA,
     GTElement as GtEA,
 )
+from petrelic.bn import Bn
 from petrelic.multiplicative.pairing import (
     G1Element as G1EM,
     G2Element as G2EM,
@@ -58,6 +57,7 @@ from petrelic.native.pairing import (
     GTElement as GtEN,
 )
 from petrelic.petlib.pairing import G1Elem as G1EP, G2Elem as G2EP, GTElem as GtEP
+
 
 #
 # Define handlers for jsonpickle.

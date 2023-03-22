@@ -8,12 +8,9 @@ ALL EXISTING TESTS IN THIS SUITE SHOULD PASS WITHOUT ANY MODIFICATION TO THEM.
 import time
 from multiprocessing import Process, Queue
 
-import pytest
-
 from expression import Scalar, Secret
 from protocol import ProtocolSpec
 from server import run
-
 from smc_party import SMCParty
 
 
@@ -79,6 +76,7 @@ def test_suite1():
     """
     f(a, b, c) = a + b + c
     """
+
     alice_secret = Secret()
     bob_secret = Secret()
     charlie_secret = Secret()
@@ -94,7 +92,6 @@ def test_suite1():
     suite(parties, expr, expected)
 
 
-
 def test_suite2():
     """
     f(a, b) = a - b
@@ -108,7 +105,7 @@ def test_suite2():
     }
 
     expr = (alice_secret - bob_secret)
-    expected = 14 -3
+    expected = 14 - 3
     suite(parties, expr, expected)
 
 
@@ -205,9 +202,9 @@ def test_suite7():
     }
 
     expr = (
-        (alice_secret * bob_secret) +
-        (bob_secret * charlie_secret) +
-        (charlie_secret * alice_secret)
+            (alice_secret * bob_secret) +
+            (bob_secret * charlie_secret) +
+            (charlie_secret * alice_secret)
     )
     expected = ((3 * 14) + (14 * 2) + (2 * 3))
     suite(parties, expr, expected)
@@ -232,10 +229,10 @@ def test_suite8():
     }
 
     expr = (
-        (
-            (alice_secret + Scalar(8)) +
-            ((bob_secret * Scalar(9)) - charlie_secret)
-         ) * (david_secret + elusinia_secret)
+            (
+                    (alice_secret + Scalar(8)) +
+                    ((bob_secret * Scalar(9)) - charlie_secret)
+            ) * (david_secret + elusinia_secret)
     )
     expected = (((3 + 8) + (14 * 9) - 2) * (5 + 7))
     suite(parties, expr, expected)

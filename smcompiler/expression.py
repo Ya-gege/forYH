@@ -11,8 +11,7 @@ MODIFY THIS FILE.
 
 import base64
 import random
-from typing import Optional
-
+from typing import Optional, Tuple
 
 ID_BYTES = 4
 
@@ -32,27 +31,23 @@ class Expression:
     def __init__(
             self,
             id: Optional[bytes] = None
-        ):
+    ):
         # If ID is not given, then generate one.
         if id is None:
             id = gen_id()
         self.id = id
 
     def __add__(self, other):
-        raise NotImplementedError("You need to implement this method.")
-
+        return Addition(self, other)
 
     def __sub__(self, other):
         raise NotImplementedError("You need to implement this method.")
 
-
     def __mul__(self, other):
-        raise NotImplementedError("You need to implement this method.")
-
+        return Multiplication(self, other)
 
     def __hash__(self):
         return hash(self.id)
-
 
     # Feel free to add as many methods as you like.
 
@@ -64,18 +59,15 @@ class Scalar(Expression):
             self,
             value: int,
             id: Optional[bytes] = None
-        ):
+    ):
         self.value = value
         super().__init__(id)
-
 
     def __repr__(self):
         return f"{self.__class__.__name__}({repr(self.value)})"
 
-
     def __hash__(self):
         return
-
 
     # Feel free to add as many methods as you like.
 
@@ -85,18 +77,52 @@ class Secret(Expression):
 
     def __init__(
             self,
-            id: Optional[bytes] = None
-        ):
+            id: Optional[bytes] = None,
+            value: Optional[int] = None
+    ):
         super().__init__(id)
-
+        self.value = value
 
     def __repr__(self):
         return (
             f"{self.__class__.__name__}({self.value if self.value is not None else ''})"
         )
 
-
     # Feel free to add as many methods as you like.
 
 
 # Feel free to add as many classes as you like.
+
+class AbstractOperator(Expression):
+    """
+    抽象操作类
+    """
+
+    def __init__(self,
+                 pre_expr: Expression,
+                 next_expr: Expression,
+                 id: Optional[bytes] = None):
+        super().__init__(id)
+        self.pre_expr = pre_expr
+        self.next_expr = next_expr
+
+    def separate(self) -> Tuple[Expression, Expression]:
+        """
+        分离操作符左右表达式
+        2 * 3 + 8  ->  2 * 3, 8
+        """
+        return self.pre_expr, self.next_expr
+
+
+class Addition(AbstractOperator):
+    """
+    加法操作
+    """
+    # def __repr__(self) -> str:
+    #     return f"({repr(self.pre_expr)} + {self.next_expr})"
+
+
+class Multiplication(AbstractOperator):
+    """
+    乘法操作
+    """

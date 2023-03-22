@@ -4,18 +4,15 @@ Trusted parameters generator.
 MODIFY THIS FILE.
 """
 
-import collections
 from typing import (
-    Dict,
     Set,
     Tuple,
 )
 
-from communication import Communication
-from secret_sharing import(
-    share_secret,
+from secret_sharing import (
     Share,
 )
+
 
 # Feel free to add as many imports as you want.
 

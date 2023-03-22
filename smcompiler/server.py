@@ -11,7 +11,6 @@ from flask import Flask, request, Response, jsonify
 
 from ttp import TrustedParamGenerator
 
-
 app: Flask = Flask("Trusted Third Party Server")
 store: Dict[str, Dict[Tuple[str, str], bytes]] = collections.defaultdict(dict)
 ttp: TrustedParamGenerator = TrustedParamGenerator()

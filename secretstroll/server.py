@@ -7,16 +7,15 @@ Server entrypoint.
 
 import argparse
 import json
-from pathlib import Path
 import random
 import sys
+from pathlib import Path
 from typing import Dict, List, Union
 
 from flask import Flask, jsonify, make_response, request
 from flask_sqlalchemy import SQLAlchemy
 
 from stroll import Server
-
 
 APP = Flask(__name__)
 DB = SQLAlchemy()
