@@ -84,7 +84,8 @@ class SMCParty:
         # 5. 获取其他参与方的计算结果
         for id in self.protocol_spec.participant_ids:
             if id != self.client_id:
-                completed_share.append(pickle.loads(self.comm.retrieve_public_message(id, self.SHARE_COMPLETED_PREFIX + id)))
+                completed_share.append(
+                    pickle.loads(self.comm.retrieve_public_message(id, self.SHARE_COMPLETED_PREFIX + id)))
 
         return reconstruct_secret(completed_share)
 
@@ -130,7 +131,10 @@ class SMCParty:
             # 处理乘法操作
             if isinstance(expr, Multiplication):
                 # 乘法存在标量直接处理
-                if scalar_format > 0:
+                # 一旦expr某一侧全为Scalar,也直接处理，防止重复分发
+                # if scalar_format > 0 or expr.has_scalar_share():
+                # Todo fix
+                if scalar_format > 0 or expr.has_scalar_share():
                     return pre_expr_share * next_expr_share
 
                 # Multiplication using the Beaver triplet protocol -- pdf-1.6
@@ -161,9 +165,9 @@ class SMCParty:
                             )
                         )
                 # x - a
-                x_a = sum(pre_expr_msg_list, start = Share(0))
+                x_a = sum(pre_expr_msg_list, start=Share(0))
                 # y - b
-                y_b = sum(next_expr_msg_list, start = Share(0))
+                y_b = sum(next_expr_msg_list, start=Share(0))
                 z = c_share + pre_expr_share * y_b + next_expr_share * x_a
                 if self.is_captain():
                     z = z - x_a * y_b

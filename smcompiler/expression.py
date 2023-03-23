@@ -53,6 +53,8 @@ class Expression:
         return hash(self.id)
 
     # Feel free to add as many methods as you like.
+    def all_scalar(self):
+        pass
 
 
 class Scalar(Expression):
@@ -117,6 +119,17 @@ class AbstractOperator(Expression):
         """
         return self.pre_expr, self.next_expr
 
+
+    def has_scalar_share(self):
+        return self.pre_expr.all_scalar() or self.next_expr.all_scalar()
+
+    def all_scalar(self):
+        if not isinstance(self, Scalar):
+            return False
+        if isinstance(self, Scalar):
+            return True
+        return self.pre_expr.all_scalar() and self.next_expr.all_scalar()
+
     def scalar_format(self):
         """
         将表达式expr操作符前后标量情况转换为具体数字
@@ -154,3 +167,5 @@ class Multiplication(AbstractOperator):
     """
     乘法操作
     """
+
+
