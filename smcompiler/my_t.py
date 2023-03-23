@@ -89,5 +89,23 @@ def suit_8():
     suite(parties, expr, expected)
 
 
+def suit_10():
+    """
+    f(a, b) = a * b * (15 + 15 * 3)
+    """
+    alice_secret = Secret()
+    bob_secret = Secret()
+
+    parties = {
+        "Alice": {alice_secret: 3},
+        "Bob": {bob_secret: 5},
+    }
+
+    # expr = alice_secret + bob_secret + (Scalar(15) + Scalar(15) * Scalar(3))
+    expr = alice_secret + bob_secret * (Scalar(60))
+    expected = 3 + 5 * (15 + 15 * 3)
+    suite(parties, expr, expected)
+
+
 if __name__ == '__main__':
-    suit_8()
+    suit_10()

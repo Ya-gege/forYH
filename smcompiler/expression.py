@@ -96,6 +96,7 @@ class Secret(Expression):
 
 # Feel free to add as many classes as you like.
 
+
 class AbstractOperator(Expression):
     """
     抽象操作类
@@ -132,6 +133,7 @@ class AbstractOperator(Expression):
         (1, 1) = 3
         """
         return int(isinstance(self.pre_expr, Scalar)) + int(isinstance(self.next_expr, Scalar) << 1)
+
 
 
 class Addition(AbstractOperator):

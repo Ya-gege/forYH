@@ -69,6 +69,7 @@ class SMCParty:
         # 2. 阻塞等待所有参与方完成第一步操作
         for id in self.protocol_spec.participant_ids:
             if id != self.client_id:
+                print("{} retrieve public msg from {}".format(self.client_id, id))
                 self.comm.retrieve_public_message(id, self.SHARE_PUBLISH_PREFIX + id)
 
         # 3. 所有参与方完成share共享后，开始解析expr，完成自己的计算任务
@@ -194,18 +195,20 @@ class SMCParty:
 
     def create_and_send_share(self):
 
-        # 获取当前参与者的secret和值
-        secret = next(iter(self.value_dict.keys()))
-        val = next(iter(self.value_dict.values()))
-        # 加密算法问题暂定
-        share_list = share_secret(val, len(self.protocol_spec.participant_ids))
-        # 向其他参与者共享share
-        for idx, id in enumerate(self.protocol_spec.participant_ids):
-            if id == self.client_id:
-                self.share_dict[secret] = share_list[idx]
-            else:
-                serialized_share = pickle.dumps(share_list[idx])
-                self.comm.send_private_message(id, str(secret.id), serialized_share)
+        # # 获取当前参与者的secret和值  不适配test_8
+        # secret = next(iter(self.value_dict.keys()))
+        # val = next(iter(self.value_dict.values()))
+        for secret in self.value_dict.keys():
+            val = self.value_dict[secret]
+            # 加密
+            share_list = share_secret(val, len(self.protocol_spec.participant_ids))
+            # 向其他参与者共享share
+            for idx, id in enumerate(self.protocol_spec.participant_ids):
+                if id == self.client_id:
+                    self.share_dict[secret] = share_list[idx]
+                else:
+                    serialized_share = pickle.dumps(share_list[idx])
+                    self.comm.send_private_message(id, str(secret.id), serialized_share)
 
         # 通知所有参与方自己完成加密并发送了share
         self.comm.publish_message(self.SHARE_PUBLISH_PREFIX + self.client_id, "~")
