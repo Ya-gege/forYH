@@ -18,6 +18,10 @@ from secret_sharing import (
 # Feel free to add as many imports as you want.
 
 
+def get_share(triplet: Tuple, idx: int) -> Tuple:
+    return triplet[0][idx], triplet[1][idx], triplet[2][idx]
+
+
 class TrustedParamGenerator:
     """
     A trusted third party that generates random values for the Beaver triplet multiplication scheme.
@@ -41,20 +45,25 @@ class TrustedParamGenerator:
     def retrieve_share(self, client_id: str, op_id: str) -> Tuple[Share, Share, Share]:
         """
         Retrieve a triplet of shares for a given client_id.
-        see pdf-1.6
+        see pdf-1.6 and ppt
         """
+        idx = self.participant_dict[client_id]
+        if op_id in self.triplet_dict:
+            return get_share(self.triplet_dict[op_id], idx)
+
+        # fresh Beaver Triplet(a, b, c)
         # 生成a, b, c 其中 a * b = c
-        a, b = random.sample(range(0, int(math.floor(math.sqrt(Share.FIELD_Q)))), 2)
+        a, b = random.sample(range(0, int(math.floor(math.sqrt(Share.F_P)))), 2)
+        # a, b = random.sample(range(0, Share.F_P), 2)
         c = a * b
         a_share = share_secret(a, len(self.participant_ids))
         b_share = share_secret(b, len(self.participant_ids))
         c_share = share_secret(c, len(self.participant_ids))
 
-        if op_id in self.triplet_dict:
-            return self.triplet_dict[op_id]
-
-        idx = self.participant_dict[client_id]
-        triplet = (a_share[idx], b_share[idx], c_share[idx])
+        triplet = (a_share, b_share, c_share)
+        # 保存该expr.id对应的三元组
         self.triplet_dict[op_id] = triplet
-        return triplet
+        return get_share(triplet, idx)
+
     # Feel free to add as many methods as you want.
+

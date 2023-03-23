@@ -40,6 +40,9 @@ class SMCParty:
     SHARE_PUBLISH_PREFIX = "send_share_from_"
     # 参与方发送自己解析expr结果的请求路径前缀
     SHARE_COMPLETED_PREFIX = "complete_share_from_"
+    # 参与方发送直接Beaver triplet protocol结果请求路径前缀
+    SHARE_TRIPLET_A_PREFIX = "send_triplet_a_from_"
+    SHARE_TRIPLET_B_PREFIX = "send_triplet_b_from_"
 
     def __init__(
             self,
@@ -128,10 +131,42 @@ class SMCParty:
                 # 乘法存在标量直接处理
                 if scalar_format > 0:
                     return pre_expr_share * next_expr_share
+
                 # Multiplication using the Beaver triplet protocol -- pdf-1.6
                 # secret * secret
+                a_share, b_share, c_share = self.comm.retrieve_beaver_triplet_shares(str(expr.id))
+                # pre_expr_share = x
+                pre_expr_share_a = pre_expr_share - a_share
+                # next_expr_share = y
+                next_expr_share_b = next_expr_share - b_share
+                # 向其他参与方共享
+                self.comm.publish_message(self.SHARE_TRIPLET_A_PREFIX + str(expr.id), pickle.dumps(pre_expr_share_a))
+                self.comm.publish_message(self.SHARE_TRIPLET_B_PREFIX + str(expr.id), pickle.dumps(next_expr_share_b))
 
+                # 检索其他参与者共享的三元组
+                pre_expr_msg_list = [pre_expr_share_a]
+                next_expr_msg_list = [next_expr_share_b]
+                for id in self.protocol_spec.participant_ids:
+                    if id != self.client_id:
+                        pre_expr_msg_list.append(
+                            pickle.loads(
+                                self.comm.retrieve_public_message(id, self.SHARE_TRIPLET_A_PREFIX + str(expr.id))
+                            )
+                        )
 
+                        next_expr_msg_list.append(
+                            pickle.loads(
+                                self.comm.retrieve_public_message(id, self.SHARE_TRIPLET_B_PREFIX + str(expr.id))
+                            )
+                        )
+                # x - a
+                x_a = sum(pre_expr_msg_list, start = Share(0))
+                # y - b
+                y_b = sum(next_expr_msg_list, start = Share(0))
+                z = c_share + pre_expr_share * y_b + next_expr_share * x_a
+                if self.is_captain():
+                    z = z - x_a * y_b
+                return z
 
         # Call specialized methods for each expression type, and have these specialized
         # methods in turn call `process_expression` on their sub-expressions to process
@@ -145,7 +180,6 @@ class SMCParty:
             * 如果Secret属于参与方自己，直接从share_dict中获取
             * 如果Secret属于其他参与方，发请求获取
         """
-
         # 本地直接获取
         if secret in self.share_dict:
             return self.share_dict[secret]

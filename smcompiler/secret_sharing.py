@@ -3,6 +3,9 @@ Secret sharing scheme.
 """
 
 from __future__ import annotations
+
+import json
+import pickle
 import random
 from typing import List
 
@@ -11,47 +14,49 @@ class Share:
     """
     A secret share in a finite field.
     """
-    FIELD_Q = 3525679
+    # Integers modulo a prime p
+    F_P = 3525679
 
     def __init__(self, val, *args, **kwargs):
         # Adapt constructor arguments as you wish
-        self.val = val % self.FIELD_Q
+        self.val = val % self.F_P
 
     def __repr__(self):
         # Helps with debugging.
-        raise NotImplementedError("You need to implement this method.")
+        return "<Share - {}>".format(self.val)
 
     def __add__(self, other):
         if not isinstance(other, Share):
             raise TypeError("Only add for Share")
-        return Share((self.val + other.val) % self.FIELD_Q)
+        return Share((self.val + other.val) % self.F_P)
 
     def __sub__(self, other):
         if not isinstance(other, Share):
             raise TypeError("Only sub for Share")
-        return Share((self.val - other.val) % self.FIELD_Q)
+        return Share((self.val - other.val) % self.F_P)
 
     def __mul__(self, other):
         if not isinstance(other, Share):
             raise TypeError("Only sub for Share")
-        return Share((self.val * other.val) % self.FIELD_Q)
+        return Share((self.val * other.val) % self.F_P)
 
     def serialize(self):
         """Generate a representation suitable for passing in a message."""
-        raise NotImplementedError("You need to implement this method.")
+        return str(self.val)
 
     @staticmethod
     def deserialize(serialized) -> Share:
         """Restore object from its serialized representation."""
-        raise NotImplementedError("You need to implement this method.")
+        return Share(int(serialized))
 
 
 def share_secret(secret: int, num_shares: int) -> List[Share]:
     """Generate secret shares."""
-    FIELD_Q = Share.FIELD_Q
-    shares_values = random.sample(range(0, FIELD_Q), num_shares - 1)
+    F_P = Share.F_P
 
-    share_0 = secret - (sum(shares_values) % FIELD_Q)
+    shares_values = random.sample(range(0, F_P), num_shares - 1)
+
+    share_0 = secret - (sum(shares_values) % F_P)
 
     shares_values = [share_0] + shares_values
 
