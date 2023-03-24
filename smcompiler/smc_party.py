@@ -131,7 +131,6 @@ class SMCParty:
             # 处理乘法操作
             if isinstance(expr, Multiplication):
                 # 乘法存在标量直接处理
-                # 一旦expr某一侧全为Scalar,也直接处理，防止重复分发
                 if scalar_format > 0:
                     return pre_expr_share * next_expr_share
 
