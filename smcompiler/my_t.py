@@ -97,12 +97,12 @@ def test_suit_10():
     bob_secret = Secret()
 
     parties = {
-        "Alice": {alice_secret: 3},
-        "Bob": {bob_secret: 5},
+        "Alice": {alice_secret: 3000},
+        "Bob": {bob_secret: 500},
     }
 
-    expr = alice_secret + bob_secret + (Scalar(2) * Scalar(15) + Scalar(3) + Scalar(2) * bob_secret)
-    expected = 3 + 5 + (2 * 15 + 3 + 2 * 5)
+    expr = alice_secret * bob_secret
+    expected = 3000 * 500
     suite(parties, expr, expected)
 
 
