@@ -13,6 +13,8 @@ import base64
 import random
 from typing import Optional, Tuple
 
+from secret_sharing import Share
+
 ID_BYTES = 4
 
 
@@ -71,6 +73,11 @@ class Scalar(Expression):
     def __repr__(self):
         return f"{self.__class__.__name__}({repr(self.value)})"
 
+    def __mul__(self, other):
+        if isinstance(other, Scalar):
+            return Scalar((self.value * other.value) % Share.F_P)
+        return super().__mul__(other)
+
     def __hash__(self):
         return
 
@@ -120,16 +127,6 @@ class AbstractOperator(Expression):
         return self.pre_expr, self.next_expr
 
 
-    def has_scalar_share(self):
-        return self.pre_expr.all_scalar() or self.next_expr.all_scalar()
-
-    def all_scalar(self):
-        if not isinstance(self, Scalar):
-            return False
-        if isinstance(self, Scalar):
-            return True
-        return self.pre_expr.all_scalar() and self.next_expr.all_scalar()
-
     def scalar_format(self):
         """
         将表达式expr操作符前后标量情况转换为具体数字
@@ -139,7 +136,7 @@ class AbstractOperator(Expression):
         (1, 0) = (Scalar, !Scalar)
         (1, 1) = (Scalar. Scalar)
 
-        boolean(a) + boolean(b) >> 1
+        boolean(a) + boolean(b) << 1
         (0, 0) = 0
         (0, 1) = 2
         (1, 0) = 1

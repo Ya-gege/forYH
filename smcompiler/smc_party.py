@@ -132,9 +132,7 @@ class SMCParty:
             if isinstance(expr, Multiplication):
                 # 乘法存在标量直接处理
                 # 一旦expr某一侧全为Scalar,也直接处理，防止重复分发
-                # if scalar_format > 0 or expr.has_scalar_share():
-                # Todo fix
-                if scalar_format > 0 or expr.has_scalar_share():
+                if scalar_format > 0:
                     return pre_expr_share * next_expr_share
 
                 # Multiplication using the Beaver triplet protocol -- pdf-1.6

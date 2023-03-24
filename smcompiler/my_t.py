@@ -101,9 +101,8 @@ def test_suit_10():
         "Bob": {bob_secret: 5},
     }
 
-    expr = alice_secret * bob_secret * (Scalar(15) + Scalar(3))
-    # expr = alice_secret + bob_secret * (Scalar(60))
-    expected = 3 * 5 * (15 + 3)
+    expr = alice_secret + bob_secret + (Scalar(2) * Scalar(15) + Scalar(3) + Scalar(2) * bob_secret)
+    expected = 3 + 5 + (2 * 15 + 3 + 2 * 5)
     suite(parties, expr, expected)
 
 

@@ -15,7 +15,8 @@ class Share:
     A secret share in a finite field.
     """
     # Integers modulo a prime p
-    F_P = 3525679
+    F_P = 3525673
+    # F_P = 5000011
 
     def __init__(self, val, *args, **kwargs):
         # Adapt constructor arguments as you wish
