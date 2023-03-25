@@ -7,6 +7,7 @@ import pickle
 from typing import (
     Dict
 )
+import sys
 
 from communication import Communication
 from expression import (
@@ -16,11 +17,11 @@ from expression import (
 from protocol import ProtocolSpec
 from secret_sharing import Share, share_secret, reconstruct_secret
 
-
 # You might want to import more classes if needed.
 
 
 # Feel free to add as many imports as you want.
+sys.setrecursionlimit(100000)
 
 
 class SMCParty:
