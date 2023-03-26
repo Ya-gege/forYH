@@ -5,6 +5,7 @@ You should not need to change this file.
 
 import collections
 import sys
+from multiprocessing import Queue
 from typing import Dict, List, Optional, Tuple
 
 from flask import Flask, request, Response, jsonify
@@ -14,6 +15,9 @@ from ttp import TrustedParamGenerator
 app: Flask = Flask("Trusted Third Party Server")
 store: Dict[str, Dict[Tuple[str, str], bytes]] = collections.defaultdict(dict)
 ttp: TrustedParamGenerator = TrustedParamGenerator()
+
+request_queue = Queue()
+response_queue = Queue()
 
 
 @app.route("/private/<sender_id>/<receiver_id>/<label>", methods=["POST"])
@@ -65,6 +69,20 @@ def retrieve_public_message(receiver_id: str, sender_id: str, label: str):
     return Response(status=404)
 
 
+@app.route("/count/bytes/<comm_type>", methods=["GET"])
+def retrieve_comm_cost_bytes_num(comm_type: str):
+    bytes_len = 0
+    if comm_type == 'request':
+        target_queue = request_queue
+    elif comm_type == 'response':
+        target_queue = response_queue
+    else:
+        raise TypeError("Type error: only for request and response!")
+    while target_queue.qsize() > 0:
+        bytes_len = bytes_len + target_queue.get()
+    return str(bytes_len), 200
+
+
 @app.route("/shares/<client_id>/<op_id>", methods=["GET"])
 def retrieve_share(client_id: str, op_id: str):
     """
@@ -80,6 +98,9 @@ def _set_value(pool: str, channel: Tuple[str, str], data: bytes) -> None:
     """
     store[pool][channel] = data
 
+    # 一但有请求存储数据，记录字节数
+    request_queue.put(len(data))
+
 
 def _get_value(pool: str, channel: Tuple[str, str]) -> Optional[bytes]:
     """
@@ -87,6 +108,9 @@ def _get_value(pool: str, channel: Tuple[str, str]) -> Optional[bytes]:
     """
     if channel not in store[pool]:
         return None
+
+    # 一但有请求取数据，记录字节数
+    response_queue.put(len(store[pool][channel]))
     return store[pool][channel]
 
 
