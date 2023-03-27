@@ -4,20 +4,22 @@ You should not need to change this file.
 """
 
 import collections
+import multiprocessing
 import sys
 from multiprocessing import Queue
 from typing import Dict, List, Optional, Tuple
 
 from flask import Flask, request, Response, jsonify
 
+from shared_counter import SharedCounter
 from ttp import TrustedParamGenerator
 
 app: Flask = Flask("Trusted Third Party Server")
 store: Dict[str, Dict[Tuple[str, str], bytes]] = collections.defaultdict(dict)
 ttp: TrustedParamGenerator = TrustedParamGenerator()
 
-request_queue = Queue()
-response_queue = Queue()
+request_counter = SharedCounter()
+response_counter = SharedCounter()
 
 
 @app.route("/private/<sender_id>/<receiver_id>/<label>", methods=["POST"])
@@ -73,14 +75,12 @@ def retrieve_public_message(receiver_id: str, sender_id: str, label: str):
 def retrieve_comm_cost_bytes_num(comm_type: str):
     bytes_len = 0
     if comm_type == 'request':
-        target_queue = request_queue
+        target_counter = request_counter
     elif comm_type == 'response':
-        target_queue = response_queue
+        target_counter = response_counter
     else:
         raise TypeError("Type error: only for request and response!")
-    while target_queue.qsize() > 0:
-        bytes_len = bytes_len + target_queue.get()
-    return str(bytes_len), 200
+    return str(target_counter.value), 200
 
 
 @app.route("/shares/<client_id>/<op_id>", methods=["GET"])
@@ -99,7 +99,7 @@ def _set_value(pool: str, channel: Tuple[str, str], data: bytes) -> None:
     store[pool][channel] = data
 
     # 一但有请求存储数据，记录字节数
-    request_queue.put(len(data))
+    request_counter.increment(len(data))
 
 
 def _get_value(pool: str, channel: Tuple[str, str]) -> Optional[bytes]:
@@ -110,7 +110,7 @@ def _get_value(pool: str, channel: Tuple[str, str]) -> Optional[bytes]:
         return None
 
     # 一但有请求取数据，记录字节数
-    response_queue.put(len(store[pool][channel]))
+    response_counter.increment(len(store[pool][channel]))
     return store[pool][channel]
 
 

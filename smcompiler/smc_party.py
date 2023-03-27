@@ -64,9 +64,8 @@ class SMCParty:
         """
         The method the client use to do the SMC.
         """
-        # 1. 创建自己的Secret，并且将自己的Secret发送给其他参与方
+        # 1. 创建自己的Share，并且将自己的Share发送给其他参与方
         self.create_and_send_share()
-
         # 2. 阻塞等待所有参与方完成第一步操作
         for id in self.protocol_spec.participant_ids:
             if id != self.client_id:

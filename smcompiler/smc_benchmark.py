@@ -108,12 +108,10 @@ def generator_parameters_mul(num_party, num_add):
 def generator_local_file(num_party, num_operator, request_cost, response_cost, type):
     file_name = "communication_cost_benchmark.txt"
     with open(file_name, 'a') as f:
-        f.write("party_{}_op_{}_type_{}:".format(num_party, num_operator, type))
-        f.write('\n')
-        f.write("   Comm_request_cost: {} bytes".format(str(request_cost)[2:-1]))
-        f.write('\n')
-        f.write("   Comm_response_cost: {} bytes".format(str(response_cost)[2:-1]))
-        f.write('\n')
+        f.write("party_{}_op_{}_type_{}:\n".format(num_party, num_operator, type))
+        f.write("   Comm_request_cost: {} bytes\n".format(str(request_cost)[2:-1]))
+        f.write("   Comm_response_cost: {} bytes\n".format(str(response_cost)[2:-1]))
+        f.write('')
 
 
 def benchmark_cms_add(num_party, num_operator, benchmark):
@@ -144,10 +142,8 @@ def test_party_10_add_50(benchmark):
     benchmark_cms_add(10, 50, benchmark)
 
 
-
 def test_party_10_add_100(benchmark):
     benchmark_cms_add(10, 100, benchmark)
-
 
 
 def test_party_10_add_500(benchmark):
@@ -158,5 +154,5 @@ def test_party_3_mul_10(benchmark):
     benchmark_cms_add(3, 10, benchmark)
 
 
-if __name__ == '__main__':
-    test_party_3_add_50()
+# if __name__ == '__main__':
+#     party_3_add_50()
