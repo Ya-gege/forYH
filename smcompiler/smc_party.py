@@ -78,7 +78,7 @@ class SMCParty:
 
         # 4. 计算任务完成后向其他参与方发布自己的计算结果
         for id in self.protocol_spec.participant_ids:
-            if id != self.client_id:
+            if id == self.client_id:
                 self.comm.publish_message(self.SHARE_COMPLETED_PREFIX + self.client_id, pickle.dumps(curr_share))
         completed_share = [curr_share]
 

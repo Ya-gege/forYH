@@ -3,7 +3,6 @@ import time
 from multiprocessing import Process, Queue
 
 import requests
-from pytest_benchmark.plugin import benchmark
 
 from expression import Secret
 from protocol import ProtocolSpec
@@ -16,23 +15,6 @@ CLIENT_NAME_PREFIX = "party_"
 def get_comm_cost(comm_type: str):
     url = f"http://localhost:5000/count/bytes/{comm_type}"
     return requests.get(url).content
-
-
-# def smc_client(client_id, prot, value_dict, queue):
-#     cli = SMCParty(
-#         client_id,
-#         "localhost",
-#         5000,
-#         protocol_spec=prot,
-#         value_dict=value_dict
-#     )
-#     res = cli.run()
-#     queue.put(res)
-#     print(f"{client_id} has finished!")
-#
-#
-# def smc_server(args):
-#     run("localhost", 5000, args)
 
 
 def run_processes(server_args, *client_args):
@@ -123,21 +105,35 @@ def generator_parameters_mul(num_party, num_add):
     return parties, clients
 
 
-def generator_local_file(num_party, num_operator, request_cost, response_cost):
-    file_name = f"party_{num_party}_op_{num_operator}.txt"
+def generator_local_file(num_party, num_operator, request_cost, response_cost, type):
+    file_name = "communication_cost_benchmark.txt"
     with open(file_name, 'w+') as f:
-        f.write("Comm_request_cost: {} bytes".format(str(request_cost)[2:-1]))
+        f.write("party_{}_op_{}_type_{}:".format(num_party, num_operator, type))
         f.write('\n')
-        f.write("Comm_response_cost: {} bytes".format(str(response_cost)[2:-1]))
+        f.write("   Comm_request_cost: {} bytes".format(str(request_cost)[2:-1]))
+        f.write('\n')
+        f.write("   Comm_response_cost: {} bytes".format(str(response_cost)[2:-1]))
+        f.write('\n')
 
 
 def benchmark_cms_add(num_party, num_operator, benchmark):
     parties, clients = generator_parameters_add(num_party, num_operator)
     results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
     # results, request_cost, response_cost = run(list(parties.keys()), *clients)
-    generator_local_file(num_party, num_operator, request_cost, response_cost)
+    # 生成通信开销文件
+    generator_local_file(num_party, num_operator, request_cost, response_cost, "add")
     for res in results:
         assert res == num_operator * FIXED_VAL
+
+
+def benchmark_cms_mul(num_party, num_operator, benchmark):
+    parties, clients = generator_parameters_mul(num_party, num_operator)
+    results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
+    # results, request_cost, response_cost = run(list(parties.keys()), *clients)
+    # 生成通信开销文件
+    generator_local_file(num_party, num_operator, request_cost, response_cost, "mul")
+    for res in results:
+        assert res == math.pow(FIXED_VAL, num_operator)
 
 
 def test_party_3_add_50(benchmark):
@@ -145,45 +141,21 @@ def test_party_3_add_50(benchmark):
 
 
 def test_party_10_add_50(benchmark):
-    num_party = 10
-    num_operator = 50
-    parties, clients = generator_parameters_add(num_party, num_operator)
-    results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
-    generator_local_file(num_party, num_operator, request_cost, response_cost)
-    # results = run(list(parties.keys()), *clients)
-    for res in results:
-        assert res == num_operator * FIXED_VAL
+    benchmark_cms_add(10, 50, benchmark)
+
 
 
 def test_party_10_add_100(benchmark):
-    num_party = 10
-    num_operator = 100
-    parties, clients = generator_parameters_add(num_party, num_operator)
-    results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
-    generator_local_file(num_party, num_operator, request_cost, response_cost)
-    # results = run(list(parties.keys()), *clients)
-    for res in results:
-        assert res == num_operator * FIXED_VAL
+    benchmark_cms_add(10, 100, benchmark)
+
 
 
 def test_party_10_add_500(benchmark):
-    num_party = 10
-    num_operator = 500
-    parties, clients = generator_parameters_add(num_party, num_operator)
-    results = benchmark(run, list(parties.keys()), *clients)
-    # results = run(list(parties.keys()), *clients)
-    for res in results:
-        assert res == num_operator * FIXED_VAL
+    benchmark_cms_add(10, 500, benchmark)
 
 
 def test_party_3_mul_10(benchmark):
-    num_party = 3
-    num_operator = 10
-    parties, clients = generator_parameters_mul(num_party, num_operator)
-    results = benchmark(run, list(parties.keys()), *clients)
-    # results = run(list(parties.keys()), *clients)
-    for res in results:
-        assert res == math.pow(FIXED_VAL, num_operator)
+    benchmark_cms_add(3, 10, benchmark)
 
 
 if __name__ == '__main__':
