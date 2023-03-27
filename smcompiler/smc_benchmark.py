@@ -107,7 +107,7 @@ def generator_parameters_mul(num_party, num_add):
 
 def generator_local_file(num_party, num_operator, request_cost, response_cost, type):
     file_name = "communication_cost_benchmark.txt"
-    with open(file_name, 'w+') as f:
+    with open(file_name, 'a') as f:
         f.write("party_{}_op_{}_type_{}:".format(num_party, num_operator, type))
         f.write('\n')
         f.write("   Comm_request_cost: {} bytes".format(str(request_cost)[2:-1]))
