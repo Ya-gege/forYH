@@ -73,7 +73,6 @@ def retrieve_public_message(receiver_id: str, sender_id: str, label: str):
 
 @app.route("/count/bytes/<comm_type>", methods=["GET"])
 def retrieve_comm_cost_bytes_num(comm_type: str):
-    bytes_len = 0
     if comm_type == 'request':
         target_counter = request_counter
     elif comm_type == 'response':

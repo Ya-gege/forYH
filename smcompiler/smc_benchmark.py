@@ -35,7 +35,7 @@ def run_processes(server_args, *client_args):
     for client in clients:
         results.append(queue.get())
 
-    # 打印通信传输字节数
+    # 获取通信传输字节数
     request_cost = get_comm_cost("request")
     response_cost = get_comm_cost("response")
 
@@ -92,6 +92,7 @@ def expr_generator_mul(num_party: int, num_mul: int):
 
 
 def generator_parameters_add(num_party, num_add):
+    # 生成parties 和 expr
     parties, expr = expr_generator_add(num_party, num_add)
     prot = ProtocolSpec(expr=expr, participant_ids=list(parties.keys()))
     clients = [(name, prot, value_dict) for name, value_dict in parties.items()]
@@ -115,6 +116,7 @@ def generator_local_file(num_party, num_operator, request_cost, response_cost, t
 
 
 def benchmark_cms_add(num_party, num_operator, benchmark):
+    # 生成parties， clients
     parties, clients = generator_parameters_add(num_party, num_operator)
     results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
     # results, request_cost, response_cost = run(list(parties.keys()), *clients)
