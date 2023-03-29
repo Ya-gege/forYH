@@ -167,9 +167,15 @@ def benchmark_cms_add_scalar(num_party, num_add_operator, num_scalar_operator, b
     results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
     # results, request_cost, response_cost = run(list(parties.keys()), *clients)
     # 生成通信开销文件
-    generator_local_file_with_scalar(num_party, num_add_operator, num_scalar_operator, request_cost, response_cost, "add")
+    generator_local_file_with_scalar(num_party, num_add_operator, num_scalar_operator, request_cost, response_cost,
+                                     "add")
     for res in results:
         assert res == FIXED_VAL * num_add_operator + num_scalar_operator * FIXED_SCALAR_VAL
+
+
+'''
+                    for test
+'''
 
 
 def test_party_3_add_50(benchmark):
@@ -188,12 +194,38 @@ def test_party_10_add_500(benchmark):
     benchmark_cms_add(10, 500, benchmark)
 
 
-def test_party_3_mul_10(benchmark):
-    benchmark_cms_mul(3, 10, benchmark)
+def test_party_3_mul_5(benchmark):
+    benchmark_cms_mul(3, 5, benchmark)
 
 
 def test_party_3_add_10_scalar_10(benchmark):
     benchmark_cms_add_scalar(3, 10, 10, benchmark)
 
-# if __name__ == '__main__':
-#     party_3_add_50()
+
+'''
+            for actual report
+'''
+
+
+def test_actual_party_5_add_50(benchmark):
+    benchmark_cms_add(5, 50, benchmark)
+
+
+def test_actual_party_10_add_50(benchmark):
+    benchmark_cms_add(10, 50, benchmark)
+
+
+def test_actual_party_15_add_50(benchmark):
+    benchmark_cms_add(15, 50, benchmark)
+
+
+def test_actual_party_20_add_50(benchmark):
+    benchmark_cms_add(20, 50, benchmark)
+
+
+def test_actual_party_25_add_50(benchmark):
+    benchmark_cms_add(25, 50, benchmark)
+
+
+def test_actual_party_30_add_50(benchmark):
+    benchmark_cms_add(30, 50, benchmark)

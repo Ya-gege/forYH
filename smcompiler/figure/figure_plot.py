@@ -7,9 +7,9 @@ plt.rc('font', family='Times New Roman')
 font_size = 14
 
 # 数据
-party_num = [3, 5, 7, 9, 11, 13]
-comm_cost_request = [594, 721, 956, 1111, 1401, 1600]
-comm_cost_response = [628, 778, 1010, 1200, 1480, 1699]
+party_num = [5, 10, 15, 20, 25, 30]
+comm_cost_request = [1428, 5702, 12834, 22806, 35632, 51296]
+comm_cost_response = [2298, 10310, 24144, 43686, 68982, 100016]
 
 plt.figure(figsize=(8, 5))
 ax = plt.subplot(111)
@@ -33,6 +33,6 @@ plt.xlabel("Number of party")
 plt.ylabel("Communication cost (bytes)")
 
 # 保存文件
-plt.savefig('communication_cost_res.png', dpi=600)
+plt.savefig('communication_cost_res_party_5_add_50.png', dpi=600)
 
 plt.show()
