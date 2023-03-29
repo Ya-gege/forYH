@@ -1,3 +1,12 @@
+party_3_op_10_type_add_scalar10:
+   Comm_request_cost: 516 bytes
+   Comm_response_cost: 690 bytes
+party_3_op_50_type_mul:
+   Comm_request_cost: 17268 bytes
+   Comm_response_cost: 34194 bytes
+party_3_op_50_type_mul:
+   Comm_request_cost: 17270 bytes
+   Comm_response_cost: 34198 bytes
 party_3_op_50_type_add:
    Comm_request_cost: 516 bytes
    Comm_response_cost: 690 bytes

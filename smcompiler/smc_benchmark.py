@@ -4,12 +4,14 @@ from multiprocessing import Process, Queue
 
 import requests
 
-from expression import Secret
+from expression import Secret, Scalar
 from protocol import ProtocolSpec
 from test_integration import smc_server, smc_client
 
 FIXED_VAL = 2
 CLIENT_NAME_PREFIX = "party_"
+
+FIXED_SCALAR_VAL = 5
 
 
 def get_comm_cost(comm_type: str):
@@ -115,6 +117,15 @@ def generator_local_file(num_party, num_operator, request_cost, response_cost, t
         f.write('')
 
 
+def generator_local_file_with_scalar(num_party, num_operator, num_scalar, request_cost, response_cost, type):
+    file_name = "communication_cost_benchmark.txt"
+    with open(file_name, 'a') as f:
+        f.write("party_{}_op_{}_type_{}_scalar_{}:\n".format(num_party, num_operator, type, num_scalar))
+        f.write("   Comm_request_cost: {} bytes\n".format(str(request_cost)[2:-1]))
+        f.write("   Comm_response_cost: {} bytes\n".format(str(response_cost)[2:-1]))
+        f.write('')
+
+
 def benchmark_cms_add(num_party, num_operator, benchmark):
     # 生成parties， clients
     parties, clients = generator_parameters_add(num_party, num_operator)
@@ -136,6 +147,31 @@ def benchmark_cms_mul(num_party, num_operator, benchmark):
         assert res == math.pow(FIXED_VAL, num_operator)
 
 
+def add_scalar(expr, num_scalar_operator):
+    for _ in range(0, num_scalar_operator):
+        expr = expr + Scalar(FIXED_SCALAR_VAL)
+    return expr
+
+
+def generator_parameters_add_scalar(num_party, num_add_operator, num_scalar_operator):
+    parties, expr = expr_generator_add(num_party, num_add_operator)
+    expr = add_scalar(expr, num_scalar_operator)
+    prot = ProtocolSpec(expr=expr, participant_ids=list(parties.keys()))
+    clients = [(name, prot, value_dict) for name, value_dict in parties.items()]
+    return parties, clients
+
+
+def benchmark_cms_add_scalar(num_party, num_add_operator, num_scalar_operator, benchmark):
+    # secret + secret + scalar
+    parties, clients = generator_parameters_add_scalar(num_party, num_add_operator, num_scalar_operator)
+    results, request_cost, response_cost = benchmark(run, list(parties.keys()), *clients)
+    # results, request_cost, response_cost = run(list(parties.keys()), *clients)
+    # 生成通信开销文件
+    generator_local_file_with_scalar(num_party, num_add_operator, num_scalar_operator, request_cost, response_cost, "add")
+    for res in results:
+        assert res == FIXED_VAL * num_add_operator + num_scalar_operator * FIXED_SCALAR_VAL
+
+
 def test_party_3_add_50(benchmark):
     benchmark_cms_add(3, 50, benchmark)
 
@@ -153,8 +189,11 @@ def test_party_10_add_500(benchmark):
 
 
 def test_party_3_mul_10(benchmark):
-    benchmark_cms_add(3, 10, benchmark)
+    benchmark_cms_mul(3, 10, benchmark)
 
+
+def test_party_3_add_10_scalar_10(benchmark):
+    benchmark_cms_add_scalar(3, 10, 10, benchmark)
 
 # if __name__ == '__main__':
 #     party_3_add_50()
