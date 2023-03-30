@@ -53,8 +53,9 @@ ax.set_ylabel(..., fontsize=font_size)
 # 坐标轴标签
 plt.xlabel("Number of party")
 plt.ylabel("")
+plt.ylim(0, 200)
 
 plt.subplots_adjust(top=0.95, bottom=0.16, left=0.07, right=0.994, hspace=0, wspace=0.15)
 # 保存文件
-plt.savefig('communication_cost_res_party_5_add_50.png', dpi=600)
+# plt.savefig('communication_cost_res_party_5_add_50.png', dpi=600)
 plt.show()
